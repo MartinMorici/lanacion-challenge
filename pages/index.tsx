@@ -1,31 +1,46 @@
 import Navbar from '@/components/Navbar';
 import Head from 'next/head'
 import Image from 'next/image'
-import ArticleImage from '../images/article.jpg'
-import api, { Article, Tag }  from '../mock/api'
+import api, { Article }  from '../mock/api'
 import { GetStaticProps } from 'next';
 
 
-
+interface Tags{
+  text: string,
+  slug:string,
+  count: number
+}
 
 export default function Home({articles} : {articles : Article[]})  {
+
+  const tagsArray:Tags[] = [];
   
-  
-    const tags:string[] = [];
-    articles.forEach((item) => {
-      item.taxonomy.tags.forEach((tag) => {
-        if (!tags.includes(tag.text)) {
-          tags.push(tag.text);
-        }
-      });
+  articles.forEach((item) => {
+    item.taxonomy.tags.forEach((tag) => {
+       const index = tagsArray.findIndex((tagArray) => {return tagArray.text === tag.text})
+
+       if (index !== -1) {
+        tagsArray[index].count = ++tagsArray[index].count
+        
+       } else{
+        tagsArray.push({ 
+          text: tag.text,
+          slug: tag.slug,
+          count: 0
+        })
+       }
     });
-    console.log(tags);
-    
+  });
+  tagsArray.sort((a, b) => b.count - a.count);
 
+  const tags = tagsArray.slice(0,10)
+  const filteredArticles = articles.filter((article) => (article.subtype === '7')).map((article) => ({
+    ...article, display_date: new Date(article.display_date).toLocaleDateString('es-ES',{ day: 'numeric', month: 'long', year: 'numeric' })
+  }))
 
-
-
-
+  
+  
+  
 
   return (
     <>
@@ -37,7 +52,7 @@ export default function Home({articles} : {articles : Article[]})  {
       </Head>
 
         <Navbar/>
-        <main className='z-[-1] relative' >
+        <main className='z-[-30]' >
           <div className='bg-gray-200 h-44 w-full'>
             <div className=' bg-blue-300 h-full max-w-[1280px] mx-auto'></div>
           </div>
@@ -45,57 +60,24 @@ export default function Home({articles} : {articles : Article[]})  {
             <div className='mr-20'>
               <h1 className='underline text-4xl'>Acumulado Grilla</h1>
               <div className='mt-4 mb-6 flex items-center gap-2'>
-                <span>Platos principales</span> 
-                <span className="font-bold text-2xl">·</span> 
-                <span>Cerdo</span> 
-                <span className="font-bold text-2xl">·</span> 
-                <span>Papas</span> 
-                <span className="font-bold text-2xl">·</span> 
-                <span>Date un gustito</span> 
-                <span className="font-bold text-2xl">·</span> 
-                <span>La Familia</span>
+                {tags.map((tag,index) => {
+                 return ( 
+                  <a className='text-blue-400 flex items-center gap-2' href={`/${tag.slug}`} key={tag.slug}>
+                    <span className='block hover:underline '>{tag.text}</span>
+                    {index < tags.length - 1 && <span className="font-bold text-lg">·</span>}
+                  </a>)
+                })}
               </div>
-              <div className='grid grid-cols-3 gap-10 justify-between items-center'>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
-                <article className=''>
-                  <Image src={ArticleImage} alt="Imagen Articulo"/>
-                  <p><span className="font-bold">La escuela.</span> que tiene de escudo al Che Guevara y donde izan la bandera de Cuba</p>
-                  <span className='text-[15px] text-gray-500'>1 de Julio de 2019</span>
-                </article>
+              <div className='grid grid-cols-3  gap-10'>
+                {filteredArticles.map((article) => {
+                  return(
+                    <article key={article._id} >
+                      <Image className='w-[280px] h-[200px]' width={280} height={186} src={article.promo_items?.basic.url!} alt={article.promo_items?.basic.subtitle!}/>
+                      <h2 className='text-lg font-semibold'>{article.headlines.basic}</h2>
+                      <span className='block mt-2 text-[15px] text-gray-500'>{article.display_date}</span>
+                    </article>
+                  )
+                })}
               </div>
             </div>
             <div className='h-full bg-blue-300 '>
