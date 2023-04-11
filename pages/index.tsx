@@ -31,17 +31,13 @@ export default function Home({articles} : {articles : Article[]})  {
        }
     });
   });
-  tagsArray.sort((a, b) => b.count - a.count);
 
-  const tags = tagsArray.slice(0,10)
+  const tags = tagsArray.sort((a, b) => b.count - a.count).slice(0,10)
   const filteredArticles = articles.filter((article) => (article.subtype === '7')).map((article) => ({
     ...article, display_date: new Date(article.display_date).toLocaleDateString('es-ES',{ day: 'numeric', month: 'long', year: 'numeric' })
   }))
 
   
-  
-  
-
   return (
     <>
       <Head>
@@ -54,35 +50,39 @@ export default function Home({articles} : {articles : Article[]})  {
         <Navbar/>
         <main className='z-[-30]' >
           <div className='bg-gray-200 h-44 w-full'>
-            <div className=' bg-blue-300 h-full max-w-[1280px] mx-auto'></div>
+            <div className='bg-blue-300 h-full max-w-[1280px] mx-auto'></div>
           </div>
-          <section className='grid grid-cols-[1fr_280px] max-w-[1280px] mx-auto mt-12'>
-            <div className='mr-20'>
+
+          <section className='px-6 text-center md:text-left grid sm:grid-cols-1 md:grid-cols-[1fr_280px] max-w-[1280px] mx-auto mt-12'>
+            <div className='sm:mr-20'>
               <h1 className='underline text-4xl'>Acumulado Grilla</h1>
-              <div className='mt-4 mb-6 flex items-center gap-2'>
+              <div className='mt-4 mb-6 flex flex-wrap items-center gap-2'>
                 {tags.map((tag,index) => {
                  return ( 
-                  <a className='text-blue-400 flex items-center gap-2' href={`/${tag.slug}`} key={tag.slug}>
+                  <a className='text-blue-400 flex  items-center gap-2' href={`/${tag.slug}`} key={tag.slug}>
                     <span className='block hover:underline '>{tag.text}</span>
                     {index < tags.length - 1 && <span className="font-bold text-lg">·</span>}
                   </a>)
                 })}
               </div>
-              <div className='grid grid-cols-3  gap-10'>
+
+              <section className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10'>
                 {filteredArticles.map((article) => {
                   return(
                     <article key={article._id} >
-                      <Image className='w-[280px] h-[200px]' width={280} height={186} src={article.promo_items?.basic.url!} alt={article.promo_items?.basic.subtitle!}/>
+                      <Image className='mx-auto block w-[280px] h-[200px] object-cover' width={280} height={186} src={article.promo_items?.basic.url!} alt={article.promo_items?.basic.subtitle!}/>
                       <h2 className='text-lg font-semibold'>{article.headlines.basic}</h2>
                       <span className='block mt-2 text-[15px] text-gray-500'>{article.display_date}</span>
                     </article>
                   )
                 })}
-              </div>
+              </section>
+
             </div>
             <div className='h-full bg-blue-300 '>
             </div>
           </section>
+
         </main>
 
     </>
